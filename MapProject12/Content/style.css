@@ -1,0 +1,23 @@
+﻿@charset "utf-8";
+html{
+/* This is the fallback background image for browsers that don't support CSS3 multiple backgrounds */	
+background: url(/Images/Parallax/bg.jpg) 0 0 fixed;
+	
+/*multiple backgrounds is a CSS3 feature only. Here we specify those backgrounds and their starting positions*/
+background: url(/Images/Parallax/bg-city.png) 0 550px repeat-x,
+ 			url(/Images/Parallax/bg-hills.png) 0 480px repeat-x,
+  			url(/Images/Parallax/bg-mountains.png) 0 350px repeat-x,
+   			url(/Images/Parallax/bg-sky.png) 0 0 repeat-x rgb(14,209,69);
+
+}
+
+body{
+background-color: white; /*fallback color for browsers that don't support CSS3*/
+background-color: rgba(255,255,255,0.3); /*white background with 30% opacity (CSS3 only)*/
+height: 1500px; /*height of the page, try experimenting with size*/
+margin: 0 auto; /*center the body*/
+/*padding: 10px;*/ 
+width: 960px; /*width of the body*/
+}
+
+.desc{width: 400px;}

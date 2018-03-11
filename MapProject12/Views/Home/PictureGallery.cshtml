@@ -1,0 +1,63 @@
+﻿@model IEnumerable<MapProject12.Models.TempPhoto>
+
+@{
+    ViewBag.Title = "PictureGallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/Gallery.js"></script>
+<link href="~/Content/Gallery.css" rel="stylesheet" />
+
+<div id="body">
+
+    <h2 style="text-align: center">Lightbox</h2>
+
+    <div class="row">
+        <div class="column">
+            <img src="~/Images/travel-diaries.png" style="width: 100%" onclick="openModal(); currentSlide(1);" class="hover-shadow cursor">
+        </div>
+       
+         @foreach (var i in Model)
+         {
+            <div class="column">
+                <img src="@i.Picture" style="width: 100%" onclick="openModal(); currentSlide('@i.Counter');" class="hover-shadow cursor">
+            </div>
+         }
+    </div>
+
+
+    <div id="myModal" class="modal">
+        <span class="close cursor" onclick="closeModal()" style="margin-top: 40px">&times;</span>
+        <div class="modal-content">
+            <div class="mySlides">
+                <div class="numbertext">1/@ViewBag.Count</div>
+                <img src="~/Images/travel-diaries.png" style="width: 100%">
+            </div>
+
+            @foreach (var i in Model)
+            {
+                <div class="mySlides">
+                    <div class="numbertext">@i.Counter/@ViewBag.Count</div>
+                    <img src="@i.Picture" style="width: 100%">
+                </div>
+            }
+
+            <a id="aprev" class="prev" onclick="plusSlides(-1)">&#10094;</a>
+            <a class="next" onclick="plusSlides(1)">&#10095;</a>
+
+            <div class="caption-container">
+                <p id="caption"></p>
+            </div>
+
+            <div class="column">
+                <img class="demo cursor" src="~/Images/travel-diaries.png" style="width: 100%" onclick="currentSlide(1)" alt="Photo">
+            </div>
+
+            @foreach (var i in Model)
+            {
+                <div class="column">
+                    <img class="demo cursor" src="@i.Picture" style="width: 100%" onclick="currentSlide('@i.Counter')" alt="Photo">
+                </div>
+            }
+        </div>
+    </div>
+    </div>

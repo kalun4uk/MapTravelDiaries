@@ -1,0 +1,182 @@
+﻿@model MapProject12.Models.TempUserModel
+
+@{
+    ViewBag.Title = "Map";
+}
+<link href="~/Content/Map.css" rel="stylesheet" />
+<script src="~/Scripts/Map.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBPizqnNCvktqnMjPV1XWb41Ce3QjskcQs&libraries=places&callback=Initialize" asynk defer></script>
+
+<script src="~/Scripts/angular.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+<body style="height: auto">
+<table style="width: 100%; margin-top: 30px; margin-bottom: 5px">
+    <tr>
+        <th style="vertical-align: bottom">
+            <div class="btn-group" style="margin-bottom: 15px">
+                <button id="btnaddmarker" class="btn btn-primary">Show visited cities</button>
+                <button id="btnhidemarker" class="btn btn-primary">Hide visited cities</button>
+            </div>
+        </th>
+        <th>
+            <form method="post" action="MapData" name="mapdata" ng-app="">
+                <table style="width: 100%">
+                    <tr>
+                        <th>
+                            <input type="hidden" name="Id"/>
+                            @*     <label>City Name</label>*@
+                            <input id="city" type="text" name="CityName" class="field left" style="display: none" required maxlength="30" ng-model="cityname">
+                            @*   <label>Latitude</label>*@
+                            <input id="lat" type="text" name="Latitude" class="field left" style="display: none" required ng-model="latitude">
+                            @*     <label>Longitude</label>*@
+                            <input id="lon" type="text" name="Longitude" class="field left" style="display: none" required ng-model="longitude">
+                            <label>Write Comment</label>
+                            <textarea rows="2" cols="25" name="Comment"></textarea>
+                        </th>
+                        <th>
+                            <input name="submitt" style="left: 10px" type="submit" value="Upload" class="btn btn-primary" ng-disabled="mapdata.cityname.$dirty && mapdata.cityname.$invalid"/>
+                        </th>
+                    </tr>
+                </table>
+            </form>
+        </th>
+    </tr>
+</table>
+
+<div id="wrapper">
+    <div id="map_canvas" style="height: 500px;"></div>
+    <input id="pac-input" style ="left:330px "class="controls" type="text" placeholder="Enter a location">
+</div>
+</body>
+
+@section scripts {
+        <section class="scripts">
+            <!-- This code tells the browser to execute the "Initialize" method only when the complete document model has been loaded. -->
+            <script type="text/javascript">
+                var map;
+                var markersVisited = [];
+                var markers = [];
+                $(document).ready(function() {
+                    Initialize();
+
+                    var input = (document.getElementById('pac-input'));
+
+                    var autocomplete = new google.maps.places.Autocomplete(input);
+                    autocomplete.bindTo('bounds', map);
+
+                    var infowindow = new google.maps.InfoWindow();
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        anchorPoint: new google.maps.Point(0, -29)
+                    });
+
+                    autocomplete.addListener('place_changed', function() {
+                        infowindow.close();
+                        marker.setVisible(false);
+                        var place = autocomplete.getPlace();
+                        if (!place.geometry) {
+                            // User entered the name of a Place that was not suggested and
+                            // pressed the Enter key, or the Place Details request failed.
+                            window.alert("No details available for input: '" + place.name + "'");
+                            return;
+                        }
+
+                        // If the place has a geometry, then present it on a map.
+                        if (place.geometry.viewport) {
+                            map.fitBounds(place.geometry.viewport);
+
+                        } else {
+                            map.setCenter(place.geometry.location);
+                            map.setZoom(17); // Why 17? Because it looks good.
+                        }
+                        marker.setIcon(({
+                            url: place.icon,
+                            size: new google.maps.Size(71, 71),
+                            origin: new google.maps.Point(0, 0),
+                            anchor: new google.maps.Point(17, 34),
+                            scaledSize: new google.maps.Size(35, 35)
+                        }));
+                        marker.setPosition(place.geometry.location);
+                        marker.setVisible(true);
+
+                        var address = '';
+                        if (place.address_components) {
+                            address = place.address_components[0];
+                        }
+
+                        document.getElementById("city").value = place.name;
+                        document.getElementById("lat").value = marker.position.lat().toFixed(6);
+                        document.getElementById("lon").value = marker.position.lng().toFixed(6);
+
+
+                        infowindow.setContent('<div><strong>' + place.name + '</strong><br>');
+                        infowindow.open(map, marker);
+                    });
+
+                    $('#btnaddmarker').on('click', function() {
+                        PutVisits();
+                    });
+
+                    $('#btnhidemarker').on('click', function() {
+                        HideVisits(markersVisited);
+                    });
+                });
+
+                function Initialize() {
+
+                    // Google has tweaked their interface somewhat - this tells the api to use that new UI
+                    google.maps.visualRefresh = true;
+
+                    // This makes the div with id "map_canvas" a google map
+                    map = new google.maps.Map(document.getElementById("map_canvas"), {
+                        zoom: 14,
+                        center: { lat: 49.83826, lng: 24.02324 },
+                        mapTypeId: google.maps.MapTypeId.G_NORMAL_MAP
+                    });
+                    LocationInitialize();
+                }
+
+                function PutVisits() {
+                    @if (ViewBag.list != null)
+                    {
+                        foreach (var data in ViewBag.list)
+                        {
+                            <text>
+
+                    var infowindow = new google.maps.InfoWindow({
+                        content: "<div class='infoDiv'><h2>" + '@data.CityName' + "</h2><div><h4>Comments: " + '@data.Comment' + "</h4></div></div>"
+
+                    });
+
+                    var marker = new google.maps.Marker({
+                        'position': new google.maps.LatLng(@data.Latitude, @data.Longitude),
+                        'map': map,
+                        'Name': '@data.CityName',
+                        'infowindow': infowindow
+                    });
+                    marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+
+
+                    markersVisited.push(marker);
+                    // finally hook up an "OnClick" listener to the map so it pops up out info-window when the marker-pin is clicked!
+                    google.maps.event.addListener(marker, 'click', function() {
+                        hideAllInfoWindows(map);
+                        this.infowindow.open(map, this);
+                        //    infowindow.open(map, marker);
+                    });
+
+                    </text>
+                        }
+                    }
+                }
+
+                function hideAllInfoWindows(map) {
+                    markers.forEach(function(marker) {
+                        marker.infowindow.close(map, marker);
+                    });
+                }
+            </script>
+
+        </section>
+    }

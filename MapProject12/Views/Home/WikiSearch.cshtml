@@ -1,0 +1,110 @@
+﻿
+@{
+    ViewBag.Title = "WikiSearch";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/Wiki.css" rel="stylesheet" />
+<script src="~/Scripts/Wiki.js"></script>
+
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<!-- This is the div that will contain the Google Map -->
+
+<div class="container" style="margin-bottom: 10px">
+    <h1>Wikipedia Search</h1>
+    <input id="searchTerm" name="search" placeholder="Search..">
+    <button id='search' type="button" class="btn btn-primary">Submit</button>
+    <div id="output"></div>
+</div>
+
+
+<!-- Enclose the Javascript in a "section" so that it is rendered in the correct order after scripts have been loaded etc -->
+@section scripts {
+    <section class="scripts">
+        <!-- This code tells the browser to execute the "Initialize" method only when the complete document model has been loaded. -->
+        <script type="text/javascript">
+            $(document).ready(function () {
+                @if (ViewBag.City != null)
+                {
+                <text>
+                document.getElementById("searchTerm").value = '@(ViewBag.City)';
+                var url = "https://uk.wikipedia.org/w/api.php?action=opensearch&search=" + '@(ViewBag.City)' + "&format=json&callback=?";
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    async: false,
+                    dataType: "json",
+                    success: function (data, status, jqXHR) {
+                        $("#output").html();
+                        for (var i = 0; i < data[1].length; i++) {
+                            $("#output").prepend("<div><div class='well'><a href=" + data[3][i] + "><h2>" + data[1][i] + "</h2>" + "<p>" + data[2][i] + "</p></a></div></div>");
+                        }
+
+                    }
+                });
+                </text>
+                }
+            });
+            $(function() {
+                // enter
+                $("#searchTerm").keypress(function(e) {
+                    if (e.keyCode === 13) {
+                        var searchTerm = $("#searchTerm").val();
+                        var url = "https://uk.wikipedia.org/w/api.php?action=opensearch&search=" + searchTerm + "&format=json&callback=?";
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            contentType: "application/json; charset=utf-8",
+                            async: false,
+                            dataType: "json",
+                            success: function(data, status, jqXHR) {
+                                //console.log(data);
+                                $("#output").html();
+                                for (var i = 0; i < data[1].length; i++) {
+                                    $("#output").prepend("<div><div class='well'><a href=" + data[3][i] + "><h2>" + data[1][i] + "</h2>" + "<p>" + data[2][i] + "</p></a></div></div>");
+                                }
+
+                            }
+                        });
+                    }
+                });
+                // click ajax call
+                $("#search").on("click", function() {
+                    var searchTerm = $("#searchTerm").val();
+                    var url = "https://uk.wikipedia.org/w/api.php?action=opensearch&search=" + searchTerm + "&format=json&callback=?";
+                    $.ajax({
+                            url: url,
+                            type: 'GET',
+                            contentType: "application/json; charset=utf-8",
+                            async: false,
+                            dataType: "json",
+                            // plop data
+                            success: function(data, status, jqXHR) {
+                                //console.log(data);
+                                $("#output").html();
+                                for (var i = 0; i < data[1].length; i++) {
+                                    $("#output").prepend("<div><div class='well'><a href=" + data[3][i] + "><h2>" + data[1][i] + "</h2>" + "<p>" + data[2][i] + "</p></a></div></div>");
+                                }
+
+                            }
+                        })
+                        .done(function() {
+                            console.log("success");
+                        })
+                        .fail(function() {
+                            console.log("error");
+                        })
+                        .always(function() {
+                            console.log("complete");
+                        });
+
+
+                });
+            });
+        </script>
+
+    </section>
+}
